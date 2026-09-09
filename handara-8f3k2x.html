@@ -277,21 +277,33 @@ document.getElementById('cities-title').textContent = CONFIG.citiesTitle;
 document.getElementById('footer-note').textContent = CONFIG.footerNote;
 document.getElementById('download-link').href = CONFIG.sheetDownloadUrl;
 
-const supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+const supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 
 function formatUpdatedAt(date){
   return 'atualizado às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
 async function loadDashboard(){
-  const { data, error } = await supabase
-    .from(CONFIG.viewName)
-    .select('*');
+  let data, error;
+  try {
+    const result = await supabaseClient.from(CONFIG.viewName).select('*');
+    data = result.data;
+    error = result.error;
+  } catch (e) {
+    error = e;
+  }
 
   if (error) {
+    let errMsg;
+    try {
+      errMsg = error.message || error.error_description || error.details || JSON.stringify(error);
+    } catch (e) {
+      errMsg = String(error);
+    }
     document.getElementById('city-list').innerHTML =
-      '<p class="empty">Não foi possível carregar os dados agora. Tente atualizar a página em alguns minutos.</p>';
-    console.error(error);
+      '<p class="empty">Não foi possível carregar os dados agora: ' + errMsg + '</p>';
+    document.getElementById('updated').textContent = 'erro ao atualizar';
+    console.error('Erro detalhado:', error);
     return;
   }
 
