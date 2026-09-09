@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel · Handara Boa Viagem</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ============================================================
+     CONFIGURAÇÃO POR CLIENTE — troque só o que está aqui dentro
+     para reaproveitar este arquivo em outro projeto.
+     ============================================================ */
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="tag" id="client-tag">Handara Boa Viagem</div>
+    <div class="header-actions">
+      <span class="updated" id="updated">atualizando…</span>
+      <a class="btn-download" id="download-link" href="#" target="_blank" rel="noopener">Baixar planilha completa</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-number" id="total">—</div>
+    <p class="hero-caption" id="hero-caption">cadastros de revendedoras registrados até agora</p>
+    <div class="stat-row">
+      <div class="stat-chip">
+        <span class="stat-value" id="last24h">—</span>
+        <span class="stat-label">novos hoje</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-value" id="last7d">—</span>
+        <span class="stat-label">novos esta semana</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="cities">
+    <h2 id="cities-title">Por cidade</h2>
+    <div id="city-list">
+      <p class="empty">carregando dados…</p>
+    </div>
+  </section>
+
+  <footer>
+    <span id="footer-note">Painel privado de acompanhamento — não compartilhe este link.</span>
+  </footer>
+
+</div>
+
+<style>
+  :root{
+    --paper: #EEF1F0;
+    --paper-raised: #F6F8F7;
+    --ink: #16202E;
+    --denim: #2B4066;
+    --denim-deep: #16223A;
+    --gold: #B8862E;
+    --thread: #7C8B99;
+    --line: #D7DCDB;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .tag{
+    display: inline-block;
+    border: 1.5px dashed var(--gold);
+    border-radius: 3px;
+    padding: 7px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--denim-deep);
+    background: var(--paper-raised);
+  }
+
+  .header-actions{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .updated{
+    font-size: 0.8rem;
+    color: var(--thread);
+  }
+
+  .btn-download{
+    border: 1px solid var(--denim);
+    color: var(--denim-deep);
+    padding: 9px 18px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .btn-download:hover{
+    background: var(--denim);
+    color: #fff;
+  }
+
+  .hero{
+    margin-bottom: 48px;
+  }
+
+  .hero-number{
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    line-height: 0.95;
+    color: var(--denim-deep);
+    letter-spacing: -0.01em;
+  }
+
+  .hero-caption{
+    margin: 6px 0 24px;
+    font-size: 1.05rem;
+    color: var(--thread);
+    max-width: 32ch;
+  }
+
+  .stat-row{
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: var(--gold);
+  }
+
+  .stat-label{
+    font-size: 0.85rem;
+    color: var(--thread);
+  }
+
+  .cities{
+    border-top: 1px solid var(--line);
+    padding-top: 32px;
+  }
+
+  .cities h2{
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 0 0 20px;
+    color: var(--ink);
+  }
+
+  .city-row{
+    display: grid;
+    grid-template-columns: minmax(120px, 180px) 1fr 44px;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 0;
+  }
+
+  .city-name{
+    font-size: 0.92rem;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .city-bar{
+    height: 8px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .city-bar-fill{
+    height: 100%;
+    background: var(--denim);
+    border-radius: 2px;
+  }
+
+  .city-count{
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--denim-deep);
+  }
+
+  .empty{
+    color: var(--thread);
+    font-size: 0.9rem;
+  }
+
+  footer{
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: var(--thread);
+  }
+
+  @media (max-width: 480px){
+    .city-row{ grid-template-columns: 96px 1fr 36px; gap: 10px; }
+    .stat-row{ gap: 20px; }
+  }
+</style>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DESTE CLIENTE
+   Para reaproveitar este arquivo em outro projeto, troque
+   só os valores abaixo e mantenha o resto do arquivo igual.
+   ============================================================ */
+const CONFIG = {
+  clientLabel: "Handara Boa Viagem",
+  heroCaption: "cadastros de revendedoras registrados até agora",
+  citiesTitle: "Por cidade",
+  footerNote: "Painel privado de acompanhamento — não compartilhe este link.",
+
+  // Projeto Supabase
+  supabaseUrl: "https://oebwqhimbixboyjjrsiv.supabase.co",
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYndxaGltYml4Ym95ampyc2l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzM0NjUsImV4cCI6MjA5OTk0OTQ2NX0.ZYYWHdmV0F7Wdna_1-Y8V7VDAtV3jClkq-eRfyJSZtg",
+
+  // View pública com só os campos seguros (sem PII) — nunca aponte
+  // para a tabela completa aqui.
+  viewName: "revendedoras_stats_publicas",
+  groupField: "cidade_uf",
+  dateField: "criado_em",
+
+  // Botão "Baixar planilha completa" — aponta para o Google Sheets
+  // já sincronizado (protegido pelo login Google, não por este link).
+  sheetDownloadUrl: "https://docs.google.com/spreadsheets/d/1Qho0jitT9MLiMl57ijeoWeMAWocKE7L5YtFz0blMJJg/export?format=xlsx",
+
+  // Quantas cidades mostrar no ranking
+  topCities: 10
+};
+
+document.getElementById('client-tag').textContent = CONFIG.clientLabel;
+document.getElementById('hero-caption').textContent = CONFIG.heroCaption;
+document.getElementById('cities-title').textContent = CONFIG.citiesTitle;
+document.getElementById('footer-note').textContent = CONFIG.footerNote;
+document.getElementById('download-link').href = CONFIG.sheetDownloadUrl;
+
+const supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+
+function formatUpdatedAt(date){
+  return 'atualizado às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function loadDashboard(){
+  const { data, error } = await supabase
+    .from(CONFIG.viewName)
+    .select('*');
+
+  if (error) {
+    document.getElementById('city-list').innerHTML =
+      '<p class="empty">Não foi possível carregar os dados agora. Tente atualizar a página em alguns minutos.</p>';
+    console.error(error);
+    return;
+  }
+
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const total = data.length;
+  let last24h = 0;
+  let last7d = 0;
+  const byCity = {};
+
+  data.forEach(row => {
+    const created = new Date(row[CONFIG.dateField]);
+    if (created >= oneDayAgo) last24h++;
+    if (created >= sevenDaysAgo) last7d++;
+
+    const city = (row[CONFIG.groupField] || 'Não informado').trim();
+    byCity[city] = (byCity[city] || 0) + 1;
+  });
+
+  document.getElementById('total').textContent = total.toLocaleString('pt-BR');
+  document.getElementById('last24h').textContent = '+' + last24h;
+  document.getElementById('last7d').textContent = '+' + last7d;
+  document.getElementById('updated').textContent = formatUpdatedAt(now);
+
+  const ranked = Object.entries(byCity)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, CONFIG.topCities);
+
+  const maxCount = ranked.length ? ranked[0][1] : 1;
+  const listEl = document.getElementById('city-list');
+
+  if (ranked.length === 0) {
+    listEl.innerHTML = '<p class="empty">Nenhum cadastro registrado ainda.</p>';
+    return;
+  }
+
+  listEl.innerHTML = ranked.map(([city, count]) => {
+    const pct = Math.max(6, Math.round((count / maxCount) * 100));
+    return `
+      <div class="city-row">
+        <span class="city-name">${city}</span>
+        <div class="city-bar"><div class="city-bar-fill" style="width:${pct}%"></div></div>
+        <span class="city-count">${count}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+loadDashboard();
+setInterval(loadDashboard, 5 * 60 * 1000); // atualiza sozinho a cada 5 min
+</script>
+
+</body>
+</html>
